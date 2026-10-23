@@ -1,6 +1,6 @@
 from difflib import get_close_matches
 #Hello from mac!!!!
-
+print("Welcome to the Job Stats Program!")
 User_Hours = 0
 Set_Pay_Rate = 0
 Calculate_Overtime = 0
