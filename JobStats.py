@@ -1,4 +1,5 @@
 # Job Stats Program 
+import questionary
 from difflib import get_close_matches
 from pathlib import Path
 print("Welcome to the Job Stats Program!")
@@ -14,32 +15,21 @@ if hours_file.is_file():
     with hours_file.open("r", encoding="utf-8") as file:
         week_num = sum(1 for _ in file)
 
-menu_options = {
-    "add hours": "Add Hours",
-    "set pay rate": "Set Pay Rate",
-    "change hours/pay rate": "Change Hours/Pay Rate",
-    "see hours": "See Hours",
-    "calculate total pay": "Calculate Total Pay",
-    "calculate overtime": "Calculate Overtime",
-    "exit": "Exit",
-}
-
 # Uses function to get user input and return the corresponding menu option, or None if the input is invalid
 def get_menu_choice():
-    menu = "Hello, what would you like to do?:\n" + "\n".join(menu_options.values())
-    choice = input(menu + "\n")
-    normalized_choice = choice.strip().lower()
+    return questionary.select(
+        "What would you like to do?",
+        choices=[
+            "Add Hours",
+            "Manage Pay Rate",
+            "Change Hours",
+            "See Hours",
+            "Calculate Total Pay",
+            "Calculate Overtime",
+            "Exit"
+        ]
+    ).ask()
 
-    if normalized_choice in menu_options:
-        return menu_options[normalized_choice]
-
-    close_match = get_close_matches(normalized_choice, menu_options, n=1, cutoff=0.6)
-    if close_match:
-        print(f"Using '{menu_options[close_match[0]]}'.")
-        return menu_options[close_match[0]]
-
-    print("I did not understand that choice. Please try again.")
-    return None
 
 # Main loop to display the menu and handle user choices
 while True:
