@@ -22,10 +22,11 @@ def get_menu_choice():
         choices=[
             "Add Hours",
             "Manage Pay Rate",
-            "Change Hours",
             "See Hours",
             "Calculate Total Pay",
             "Calculate Overtime",
+            "Load Saved Data",
+            "Save Data",
             "Exit"
         ]
     ).ask()
@@ -53,42 +54,32 @@ while True:
             except ValueError:
                 print("Please enter a valid, non-negative number of hours.")
 
-    elif user_choice == "Change Hours/Pay Rate":
+    if user_choice == "Manage Pay Rate":
         while True:
             try:
-                user_choice = input("Would you like to change hours or pay rate? (Enter 'Change Hours' or 'Change Pay Rate'): ")
-                if user_choice == "Change Hours":
-                        week = int(input("What week do you want to change? "))
-                        if week <= 0:
-                            raise ValueError
-                        User_Hours = float(input("Enter the new number of hours worked: "))
-                        with hours_file.open('r+', encoding="utf-8") as f:
-                            content = f.read()
+                pay_rate_choice = questionary.select(
+                    "What would you like to do?",
+                    choices=[
+                        "Set Pay Rate",
+                        "Change Pay Rate"
+                    ]
+                ).ask()
 
-                            anchor = content.index(f'Week: {week}')
-                            pos = anchor + len(f'Week: {week}')
-
-                            while content[pos] in ' :':
-                                pos += 1
-
-                            # find where old value ends
-                            end = pos
-                            while end < len(content) and content[end] not in '\n ':
-                                end += 1
-
-                            content = content[:pos] + str(User_Hours) + content[end:]
-                            f.seek(0)
-                            f.truncate()
-                            f.write(content)
-
-                            with hours_file.open("r", encoding="utf-8") as file:
-                                        print(file.read())
-                            break
-                elif user_choice == "Change Pay Rate":
+                if pay_rate_choice is None:
+                    break
+                elif pay_rate_choice == "Set Pay Rate":
+                    Set_Pay_Rate = float(input("Enter your pay rate: "))
+                    if Set_Pay_Rate < 0:
+                        raise ValueError
+                    with pay_rate_file.open("w", encoding="utf-8") as file:
+                        file.write(f"Pay Rate: {Set_Pay_Rate}\n")
+                    break
+                elif pay_rate_choice == "Change Pay Rate":
                     Set_Pay_Rate = float(input("Enter the new pay rate: "))
+                    if Set_Pay_Rate < 0:
+                        raise ValueError
                     with pay_rate_file.open('r+', encoding="utf-8") as f:
                         content = f.read()
-
                         anchor = content.index('Pay Rate:')
                         pos = anchor + len('Pay Rate:')
 
@@ -105,34 +96,54 @@ while True:
                         f.truncate()
                         f.write(content)
 
-                        with hours_file.open("r", encoding="utf-8") as file:
-                                    print(file.read())
-                        break
-            except ValueError:
-                print("Please enter a valid, non-negative number of hours.")
-
-    elif user_choice == "See Hours":
-        with hours_file.open("r", encoding="utf-8") as file:
-            print(file.read())
-
-    elif user_choice == "Set Pay Rate":
-        while True:
-            try:
-                Set_Pay_Rate = float(input("Enter your pay rate: "))
-                tempPayRate = Set_Pay_Rate
-                if Set_Pay_Rate < 0:
-                    raise ValueError
-                with pay_rate_file.open("a", encoding="utf-8") as file:
-                    file.write(f"Pay Rate: {Set_Pay_Rate}\n")
-                break
+                    with hours_file.open("r", encoding="utf-8") as file:
+                        print(file.read())
+                    break
             except ValueError:
                 print("Please enter a valid, non-negative pay rate.")
 
-    elif user_choice == "Calculate Total Pay":
+    if user_choice == "Change Hours":
+        while True:
+            try:
+                week = int(input("What week do you want to change? "))
+                if week <= 0:
+                    raise ValueError
+                User_Hours = float(input("Enter the new number of hours worked: "))
+                with hours_file.open('r+', encoding="utf-8") as f:
+                    content = f.read()
+
+                    anchor = content.index(f'Week: {week}')
+                    pos = anchor + len(f'Week: {week}')
+
+                    while content[pos] in ' :':
+                        pos += 1
+
+                    # find where old value ends
+                    end = pos
+                    while end < len(content) and content[end] not in '\n ':
+                        end += 1
+
+                    content = content[:pos] + str(User_Hours) + content[end:]
+                    f.seek(0)
+                    f.truncate()
+                    f.write(content)
+
+                    with hours_file.open("r", encoding="utf-8") as file:
+                            print(file.read())
+                            break
+            except ValueError:
+                print("Please enter a valid week number and non-negative hours.")
+
+
+    if user_choice == "See Hours":
+        with hours_file.open("r", encoding="utf-8") as file:
+            print(file.read())
+
+    if user_choice == "Calculate Total Pay":
         Calculate_Total_Pay = round(User_Hours * Set_Pay_Rate, 2)
         print("Your total pay is: $",Calculate_Total_Pay)
 
-    elif user_choice == "Calculate Overtime":
+    if user_choice == "Calculate Overtime":
         if User_Hours > 40:
             overtime_hours = User_Hours - 40
             overtime_pay = overtime_hours * (Set_Pay_Rate * 1.5)
@@ -141,5 +152,26 @@ while True:
         else:
             print("You have not worked overtime hours.")
 
+    if user_choice == "Load Saved Data":
+        if hours_file.is_file():
+            with hours_file.open("r", encoding="utf-8") as file:
+                print("Loaded Work Hours:")
+                print(file.read())
+        else:
+            print("No saved work hours data found.")
 
+        if pay_rate_file.is_file():
+            with pay_rate_file.open("r", encoding="utf-8") as file:
+                print("Loaded Pay Rate:")
+                print(file.read())
+        else:
+            print("No saved pay rate data found.")
 
+    if user_choice == "Save Data":
+        with hours_file.open("r", encoding="utf-8") as file:
+            print("Saved Work Hours:")
+            print(file.read())
+
+        with pay_rate_file.open("r", encoding="utf-8") as file:
+            print("Saved Pay Rate:")
+            print(file.read())
