@@ -137,7 +137,10 @@ while True:
 
     if user_choice == "See Hours":
         with hours_file.open("r", encoding="utf-8") as file:
-            print(file.read())
+            if hours_file.is_file():
+                print(file.read())
+            else:
+                print("No work hours data found.")
 
     if user_choice == "Calculate Total Pay":
         Calculate_Total_Pay = round(User_Hours * Set_Pay_Rate, 2)
